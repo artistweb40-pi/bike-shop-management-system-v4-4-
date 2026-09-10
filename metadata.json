@@ -1,0 +1,6 @@
+{
+  "name": "Bike Shop Management System V4",
+  "description": "Production-grade offline-first Pakistani motorcycle showroom management system with IndexedDB storage, complete purchase-to-sale lifecycle, cost tracking, installment financing, cashbook accounting, and full backup/restore.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
