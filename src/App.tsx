@@ -40,11 +40,18 @@ import { DailyShowroomTestModal } from './components/DailyShowroomTestModal';
 import { ImageModal } from './components/ImageModal';
 import { ReceiptModal } from './components/ReceiptModal';
 import { SettingsModal } from './components/SettingsModal';
-import { RefreshCw } from 'lucide-react';
+import { AuthView } from './components/AuthView';
+import { onAuthChange, logoutUser } from './services/authService';
+import { User } from 'firebase/auth';
+import { RefreshCw, Bike as BikeIcon } from 'lucide-react';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<NavigationTab>('dashboard');
   const [isLoading, setIsLoading] = useState(true);
+
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   // Global State Stores
   const [bikes, setBikes] = useState<Bike[]>([]);
@@ -117,6 +124,22 @@ export default function App() {
   useEffect(() => {
     refreshAllData();
   }, [refreshAllData]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthChange((user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+  };
 
   // Handlers for Transaction Operations
   const handleAddPurchase = async (params: any) => {
@@ -238,15 +261,34 @@ export default function App() {
     0
   );
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300 space-y-4">
-        <RefreshCw className="w-10 h-10 text-amber-500 animate-spin" />
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-xl flex items-center justify-center">
+          <div className="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+            <BikeIcon className="w-6 h-6 text-emerald-400" />
+          </div>
+        </div>
+        <RefreshCw className="w-7 h-7 text-emerald-400 animate-spin" />
         <div className="text-center">
-          <h1 className="text-lg font-black text-white">Opening Showroom Database (V4)</h1>
-          <p className="text-xs text-slate-500 mt-1">Initializing IndexedDB relational engine...</p>
+          <h1 className="text-base font-black text-white tracking-tight">
+            {settings.showroomName || 'Usman Trader and Autos'}
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Loading showroom security & IndexedDB database...
+          </p>
         </div>
       </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <AuthView
+        onLoginSuccess={refreshAllData}
+        showroomTitle={settings.showroomName || 'Usman Trader and Autos'}
+        showroomCity={settings.city || 'Circular Road, Lahore'}
+      />
     );
   }
 
@@ -260,6 +302,8 @@ export default function App() {
         onSelectTab={setCurrentTab}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onOpenTestSimulation={() => setIsTestModalOpen(true)}
+        user={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Main Workspace Layout */}
@@ -461,6 +505,8 @@ export default function App() {
           settings={settings}
           onClose={() => setIsSettingsModalOpen(false)}
           onSave={handleSaveSettings}
+          user={currentUser}
+          onLogout={handleLogout}
         />
       )}
 

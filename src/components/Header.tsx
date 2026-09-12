@@ -11,6 +11,8 @@ import {
   Settings,
   Sparkles,
   Cloud,
+  LogOut,
+  User as UserIcon,
 } from 'lucide-react';
 import { Language, ShowroomSettings } from '../types';
 import { formatPKDateTime, getCurrentDate, getCurrentTime } from '../utils/formatters';
@@ -26,6 +28,8 @@ interface HeaderProps {
   onOpenTestModal?: () => void;
   onOpenTestSimulation?: () => void;
   onOpenSettings?: () => void;
+  user?: { email?: string | null; displayName?: string | null } | null;
+  onLogout?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -39,6 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenTestModal,
   onOpenTestSimulation,
   onOpenSettings = () => {},
+  user,
+  onLogout,
 }) => {
   const [clock, setClock] = useState('');
   const handleTestModal = onOpenTestSimulation || onOpenTestModal || (() => {});
@@ -154,6 +160,36 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Settings className="w-4 h-4" />
             </button>
+
+            {/* Signed-in User Profile & Logout */}
+            {user && (
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
+                <div
+                  className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300"
+                  title={`Logged in as ${user.email || user.displayName}`}
+                >
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="max-w-[120px] truncate font-medium text-slate-200">
+                    {user.displayName || user.email?.split('@')[0]}
+                  </span>
+                </div>
+
+                {onLogout && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to sign out of the showroom?')) {
+                        onLogout();
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 transition shadow-sm"
+                    title="Sign Out of Showroom"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Logout</span>
+                  </button>
+                )}
+              </div>
+            )}
 
           </div>
 

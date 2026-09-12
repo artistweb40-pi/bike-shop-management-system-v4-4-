@@ -12,6 +12,9 @@ import {
   FileText,
   CheckCircle2,
   Save,
+  User as UserIcon,
+  LogOut,
+  ShieldCheck,
 } from 'lucide-react';
 import { ShowroomSettings } from '../types';
 
@@ -20,6 +23,8 @@ interface SettingsModalProps {
   settings: ShowroomSettings;
   onClose: () => void;
   onSave: (settings: ShowroomSettings) => Promise<any>;
+  user?: { email?: string | null; displayName?: string | null } | null;
+  onLogout?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -27,6 +32,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   settings,
   onClose,
   onSave,
+  user,
+  onLogout,
 }) => {
   const [showroomName, setShowroomName] = useState(settings.showroomName || 'Pak Motor Showroom');
   const [ownerName, setOwnerName] = useState(settings.ownerName || 'Haji Muhammad Aslam');
@@ -194,6 +201,40 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-xs text-slate-100 leading-relaxed font-sans"
             />
           </div>
+
+          {/* Cloud Account & Vercel Session Info */}
+          {user && (
+            <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-200">
+                    {user.displayName || 'Showroom Admin'}
+                  </div>
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    {user.email}
+                  </div>
+                </div>
+              </div>
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Sign out of your showroom account?')) {
+                      onClose();
+                      onLogout();
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 transition flex items-center gap-1.5"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out</span>
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
             <button

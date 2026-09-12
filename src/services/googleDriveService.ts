@@ -3,20 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
-  getAuth,
   signInWithPopup,
   signOut as firebaseSignOut,
   GoogleAuthProvider,
   onAuthStateChanged,
   User,
 } from 'firebase/auth';
-import firebaseConfig from '../../firebase-applet-config.json';
-
-// Initialize Firebase App and Auth
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig as any);
-const auth = getAuth(app);
+import { auth } from './firebase';
 
 // Scopes required for Google Drive backup, restore, and file management
 export const SCOPES = [
