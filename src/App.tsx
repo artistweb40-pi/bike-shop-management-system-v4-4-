@@ -41,7 +41,7 @@ import { ImageModal } from './components/ImageModal';
 import { ReceiptModal } from './components/ReceiptModal';
 import { SettingsModal } from './components/SettingsModal';
 import { AuthView } from './components/AuthView';
-import { onAuthChange, logoutUser } from './services/authService';
+import { onAuthChange, logoutUser, getMasterSession } from './services/authService';
 import { User } from 'firebase/auth';
 import { RefreshCw, Bike as BikeIcon } from 'lucide-react';
 
@@ -126,8 +126,18 @@ export default function App() {
   }, [refreshAllData]);
 
   useEffect(() => {
+    const master = getMasterSession();
+    if (master) {
+      setCurrentUser(master as any);
+      setAuthLoading(false);
+    }
     const unsubscribe = onAuthChange((user) => {
-      setCurrentUser(user);
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        const fallback = getMasterSession();
+        setCurrentUser(fallback as any);
+      }
       setAuthLoading(false);
     });
     return () => unsubscribe();
@@ -136,6 +146,7 @@ export default function App() {
   const handleLogout = async () => {
     try {
       await logoutUser();
+      setCurrentUser(null);
     } catch (err) {
       console.error('Sign out error:', err);
     }

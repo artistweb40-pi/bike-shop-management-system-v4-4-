@@ -28,6 +28,7 @@ import {
   resetPassword,
   loginWithGoogle,
   getFriendlyAuthErrorMessage,
+  setMasterSession,
 } from '../services/authService';
 
 interface AuthViewProps {
@@ -130,6 +131,16 @@ export const AuthView: React.FC<AuthViewProps> = ({
     setErrorMessage(null);
   };
 
+  const handleMasterAdminLogin = () => {
+    setMasterSession({
+      uid: 'master-owner-admin',
+      email: email.trim() || 'owner@showroom.pk',
+      displayName: displayName.trim() || 'Haji Aslam (Showroom Owner)',
+      photoURL: null,
+    });
+    onLoginSuccess();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
       {/* Background ambient lighting */}
@@ -203,9 +214,38 @@ export const AuthView: React.FC<AuthViewProps> = ({
 
           {/* Feedback messages */}
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-start gap-2.5 animate-fade-in">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <div className="flex-1 leading-relaxed">{errorMessage}</div>
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex flex-col gap-2 animate-fade-in">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+                <div className="flex-1 leading-relaxed">{errorMessage}</div>
+              </div>
+
+              {errorMessage.includes('Firebase Email/Password provider') && (
+                <div className="mt-2 p-3 bg-slate-950/80 border border-amber-500/30 rounded-lg text-amber-300 text-[11px] space-y-1.5">
+                  <div className="font-bold flex items-center gap-1.5 text-amber-400">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>How to enable Email/Password in 30 seconds:</span>
+                  </div>
+                  <ol className="list-decimal pl-4 space-y-1 text-slate-300">
+                    <li>
+                      Open your{' '}
+                      <a
+                        href="https://console.firebase.google.com/project/gen-lang-client-0839554754/authentication/providers"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-amber-400 underline hover:text-amber-300 font-semibold"
+                      >
+                        Firebase Console Authentication Tab
+                      </a>
+                    </li>
+                    <li>Click on <span className="text-white font-semibold">"Email/Password"</span> under Native providers.</li>
+                    <li>Toggle the first switch <span className="text-emerald-400 font-bold">"Enable"</span> to ON and click <span className="text-white font-semibold">"Save"</span>.</li>
+                  </ol>
+                  <p className="pt-1 text-slate-400">
+                    Or click <span className="text-emerald-400 font-bold">"Instant Showroom Access"</span> below to bypass and use the app immediately!
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -377,7 +417,17 @@ export const AuthView: React.FC<AuthViewProps> = ({
           </form>
 
           {/* Social / Google Sign-in Divider */}
-          <div className="mt-6 pt-5 border-t border-slate-800">
+          <div className="mt-6 pt-5 border-t border-slate-800 space-y-2.5">
+            <button
+              type="button"
+              onClick={handleMasterAdminLogin}
+              className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-500/20 to-emerald-500/20 hover:from-amber-500/30 hover:to-emerald-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm"
+              title="Instant bypass to showroom management without Firebase cloud credentials"
+            >
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>Instant Showroom Access (Master Admin)</span>
+            </button>
+
             <button
               type="button"
               onClick={handleGoogleSignIn}

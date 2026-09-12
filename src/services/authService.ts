@@ -48,7 +48,7 @@ export function getFriendlyAuthErrorMessage(errorCode: string): string {
     case 'auth/popup-blocked':
       return 'Popup was blocked by your browser. Please allow popups for this site.';
     case 'auth/operation-not-allowed':
-      return 'Email/Password sign-in is being enabled in Firebase. Please ensure Email/Password provider is enabled.';
+      return "Firebase Email/Password provider is currently OFF in your Firebase Console. Go to Firebase Console > Authentication > Sign-in method > Email/Password, toggle 'Enable' and click Save. (Or use 'Instant Showroom Access' or Google Sign-In below).";
     default:
       return errorCode.replace('auth/', '').replace(/-/g, ' ');
   }
@@ -94,11 +94,35 @@ export async function loginWithGoogle(): Promise<User> {
   return credential.user;
 }
 
+const MASTER_SESSION_KEY = 'pk_showroom_master_session';
+
+export function setMasterSession(profile: AuthUserProfile): void {
+  localStorage.setItem(MASTER_SESSION_KEY, JSON.stringify(profile));
+}
+
+export function getMasterSession(): AuthUserProfile | null {
+  try {
+    const raw = localStorage.getItem(MASTER_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearMasterSession(): void {
+  localStorage.removeItem(MASTER_SESSION_KEY);
+}
+
 /**
  * Sign out current user
  */
 export async function logoutUser(): Promise<void> {
-  await signOut(auth);
+  clearMasterSession();
+  try {
+    await signOut(auth);
+  } catch {
+    // Ignore if not logged in to Firebase SDK
+  }
 }
 
 /**
