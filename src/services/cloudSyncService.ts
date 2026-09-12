@@ -39,6 +39,35 @@ export interface CloudSyncStatus {
   syncedCount: number;
 }
 
+/**
+ * Recursively removes keys with `undefined` values and sanitizes payloads for Firestore.
+ * Firestore strictly forbids `undefined` in document fields and batches.
+ */
+export function sanitizeForFirestore<T = any>(value: any): T {
+  if (value === undefined) {
+    return null as any;
+  }
+  if (value === null || typeof value !== 'object') {
+    if (typeof value === 'number' && isNaN(value)) {
+      return 0 as any;
+    }
+    return value;
+  }
+  if (value instanceof Date) {
+    return isNaN(value.getTime()) ? null : (value.toISOString() as any);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeForFirestore(item)) as any;
+  }
+  const sanitized: Record<string, any> = {};
+  for (const [key, val] of Object.entries(value)) {
+    if (val !== undefined) {
+      sanitized[key] = sanitizeForFirestore(val);
+    }
+  }
+  return sanitized as T;
+}
+
 class CloudSyncService {
   private activeListeners: Unsubscribe[] = [];
   private currentUserId: string | null = null;
@@ -231,7 +260,7 @@ class CloudSyncService {
         for (const [id, localDoc] of localMap.entries()) {
           if (!remoteMap.has(id)) {
             const docRef = doc(db, 'users', userId, storeName, id);
-            batch.set(docRef, { ...localDoc, userId }, { merge: true });
+            batch.set(docRef, sanitizeForFirestore({ ...localDoc, userId }), { merge: true });
             batchCount++;
             totalSynced++;
           }
@@ -246,7 +275,7 @@ class CloudSyncService {
       const settingsDocRef = doc(db, 'users', userId, 'settings', 'general');
       const localSettings = await dbManager.getSettings();
       if (localSettings) {
-        await setDoc(settingsDocRef, { ...localSettings, userId }, { merge: true });
+        await setDoc(settingsDocRef, sanitizeForFirestore({ ...localSettings, userId }), { merge: true });
       }
 
       this.updateStatus({
@@ -288,7 +317,7 @@ class CloudSyncService {
           chunk.forEach((item) => {
             if (item && item.id) {
               const docRef = doc(db, 'users', userId, storeName, String(item.id));
-              batch.set(docRef, { ...item, userId }, { merge: true });
+              batch.set(docRef, sanitizeForFirestore({ ...item, userId }), { merge: true });
               count++;
             }
           });
@@ -301,7 +330,7 @@ class CloudSyncService {
       const settings = await dbManager.getSettings();
       if (settings) {
         const docRef = doc(db, 'users', userId, 'settings', 'general');
-        await setDoc(docRef, { ...settings, userId }, { merge: true });
+        await setDoc(docRef, sanitizeForFirestore({ ...settings, userId }), { merge: true });
         count++;
       }
 
@@ -330,7 +359,7 @@ class CloudSyncService {
     if (!userId || !entity || !entity.id) return;
     try {
       const docRef = doc(db, 'users', userId, storeName, String(entity.id));
-      await setDoc(docRef, { ...entity, userId }, { merge: true });
+      await setDoc(docRef, sanitizeForFirestore({ ...entity, userId }), { merge: true });
       this.updateStatus({ lastSyncedAt: new Date() });
     } catch (err) {
       console.warn(`Failed to push ${storeName}/${entity.id} to cloud:`, err);

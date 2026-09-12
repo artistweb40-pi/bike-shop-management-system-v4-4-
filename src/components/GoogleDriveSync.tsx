@@ -20,6 +20,7 @@ import {
   Clock,
   AlertCircle,
   X,
+  Sparkles,
 } from 'lucide-react';
 import {
   googleSignIn,
@@ -59,14 +60,24 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({
   const [backupToDelete, setBackupToDelete] = useState<DriveFile | null>(null);
   const [showOriginHelp, setShowOriginHelp] = useState(false);
   const [originCopied, setOriginCopied] = useState(false);
+  const [hostnameCopied, setHostnameCopied] = useState(false);
 
-  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+  const currentHostname = typeof window !== 'undefined' ? window.location.hostname : 'bike-shop-management-system-v4-4.vercel.app';
+  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://bike-shop-management-system-v4-4.vercel.app';
 
   const copyOriginToClipboard = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(currentOrigin);
       setOriginCopied(true);
       setTimeout(() => setOriginCopied(false), 2500);
+    }
+  };
+
+  const copyHostnameToClipboard = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(currentHostname);
+      setHostnameCopied(true);
+      setTimeout(() => setHostnameCopied(false), 2500);
     }
   };
 
@@ -311,29 +322,135 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({
 
       {/* Notification Toast Banner */}
       {statusMessage && (
-        <div
-          className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-2 transition-all ${
-            statusMessage.type === 'success'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-              : statusMessage.type === 'error'
-              ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-              : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            {statusMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 shrink-0" />}
-            {statusMessage.type === 'error' && <AlertTriangle className="w-4 h-4 shrink-0" />}
-            {statusMessage.type === 'info' && <Cloud className="w-4 h-4 shrink-0" />}
-            <span>{statusMessage.text}</span>
-          </div>
-          <button
-            onClick={() => setStatusMessage(null)}
-            className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition"
-            title="Dismiss"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        <>
+          {statusMessage.text.includes('Authorized Domain') ? (
+            <div className="p-4 rounded-2xl bg-slate-950/90 border border-amber-500/40 text-xs space-y-3 shadow-2xl animate-fade-in">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5 text-amber-400 font-bold text-sm">
+                  <ShieldCheck className="w-5 h-5 shrink-0" />
+                  <span>Domain Authorization Required in Firebase Console</span>
+                </div>
+                <button
+                  onClick={() => setStatusMessage(null)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                  title="Dismiss"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="text-slate-300 leading-relaxed text-xs">
+                Firebase Authentication and Google Cloud protect your project by requiring production domains (such as Vercel) to be whitelisted under <b>Authorized Domains</b>.
+              </p>
+
+              {/* Copy Boxes */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-2">
+                  <div className="truncate">
+                    <div className="text-[10px] uppercase font-bold text-slate-400">1. For Firebase Authorized Domains:</div>
+                    <div className="font-mono text-xs text-emerald-400 font-semibold truncate select-all">{currentHostname}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={copyHostnameToClipboard}
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold shrink-0 transition flex items-center gap-1"
+                  >
+                    {hostnameCopied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+                    <span>{hostnameCopied ? 'Copied!' : 'Copy'}</span>
+                  </button>
+                </div>
+
+                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-2">
+                  <div className="truncate">
+                    <div className="text-[10px] uppercase font-bold text-slate-400">2. For GCP OAuth Origins (Google Drive):</div>
+                    <div className="font-mono text-xs text-blue-400 font-semibold truncate select-all">{currentOrigin}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={copyOriginToClipboard}
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold shrink-0 transition flex items-center gap-1"
+                  >
+                    {originCopied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Sparkles className="w-3.5 h-3.5 text-blue-400" />}
+                    <span>{originCopied ? 'Copied!' : 'Copy'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Step-by-Step Instructions & Direct Links */}
+              <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 space-y-2 text-[11px]">
+                <div className="font-bold text-slate-200">Easy 2-Minute Whitelisting Steps:</div>
+                <ol className="list-decimal pl-4 space-y-1.5 text-slate-300">
+                  <li>
+                    Click to open{' '}
+                    <a
+                      href="https://console.firebase.google.com/project/gen-lang-client-0839554754/authentication/settings"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-amber-400 underline hover:text-amber-300 font-bold inline-flex items-center gap-1"
+                    >
+                      Firebase Console &gt; Authentication &gt; Settings &gt; Authorized Domains ↗
+                    </a>
+                  </li>
+                  <li>Under <b>Authorized domains</b>, click <b>Add domain</b>, paste <code className="text-emerald-300 bg-slate-950 px-1 py-0.5 rounded">{currentHostname}</code> (or <code className="text-emerald-300 bg-slate-950 px-1 py-0.5 rounded">vercel.app</code>) and click <b>Save</b>.</li>
+                  <li>
+                    (For Google Drive Backup) Open{' '}
+                    <a
+                      href="https://console.cloud.google.com/apis/credentials?project=gen-lang-client-0839554754"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-400 underline hover:text-blue-300 font-bold inline-flex items-center gap-1"
+                    >
+                      Google Cloud Console &gt; Credentials ↗
+                    </a>
+                    , click your Web Client ID, add <code className="text-blue-300 bg-slate-950 px-1 py-0.5 rounded">{currentOrigin}</code> under <b>Authorized JavaScript origins</b> and click <b>Save</b>.
+                  </li>
+                </ol>
+              </div>
+
+              {/* Offline Alternative Notice */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800">
+                <span className="text-[11px] text-emerald-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>Offline JSON Backups and PDF archives work without any Google Cloud configuration!</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStatusMessage(null);
+                    window.scrollTo({ top: 700, behavior: 'smooth' });
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition"
+                >
+                  Use Offline Full Database Backup ↓
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-2 transition-all ${
+                statusMessage.type === 'success'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : statusMessage.type === 'error'
+                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                  : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {statusMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 shrink-0" />}
+                {statusMessage.type === 'error' && <AlertTriangle className="w-4 h-4 shrink-0" />}
+                {statusMessage.type === 'info' && <Cloud className="w-4 h-4 shrink-0" />}
+                <span>{statusMessage.text}</span>
+              </div>
+              <button
+                onClick={() => setStatusMessage(null)}
+                className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                title="Dismiss"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {user ? (

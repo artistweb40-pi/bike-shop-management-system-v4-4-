@@ -49,6 +49,8 @@ export function getFriendlyAuthErrorMessage(errorCode: string): string {
       return 'Popup was blocked by your browser. Please allow popups for this site.';
     case 'auth/operation-not-allowed':
       return "Firebase Email/Password provider is currently OFF in your Firebase Console. Go to Firebase Console > Authentication > Sign-in method > Email/Password, toggle 'Enable' and click Save. (Or use 'Instant Showroom Access' or Google Sign-In below).";
+    case 'auth/unauthorized-domain':
+      return `Domain Authorization Required: The domain "${typeof window !== 'undefined' ? window.location.hostname : 'this domain'}" is not authorized in Firebase. Add it under Firebase Console > Authentication > Settings > Authorized Domains, or click "Instant Showroom Access" below.`;
     default:
       return errorCode.replace('auth/', '').replace(/-/g, ' ');
   }

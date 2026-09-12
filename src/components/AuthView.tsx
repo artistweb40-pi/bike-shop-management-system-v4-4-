@@ -52,6 +52,18 @@ export const AuthView: React.FC<AuthViewProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [domainCopied, setDomainCopied] = useState(false);
+
+  const currentHostname = typeof window !== 'undefined' ? window.location.hostname : 'bike-shop-management-system-v4-4.vercel.app';
+  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://bike-shop-management-system-v4-4.vercel.app';
+
+  const copyDomain = (textToCopy: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+      setDomainCopied(true);
+      setTimeout(() => setDomainCopied(false), 2500);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,6 +256,73 @@ export const AuthView: React.FC<AuthViewProps> = ({
                   <p className="pt-1 text-slate-400">
                     Or click <span className="text-emerald-400 font-bold">"Instant Showroom Access"</span> below to bypass and use the app immediately!
                   </p>
+                </div>
+              )}
+
+              {(errorMessage.includes('Domain Authorization') ||
+                errorMessage.includes('unauthorized-domain') ||
+                errorMessage.includes('needs to be authorized')) && (
+                <div className="mt-2 p-3.5 bg-slate-950/90 border border-amber-500/40 rounded-xl text-slate-300 text-[11px] space-y-2.5">
+                  <div className="font-bold flex items-center justify-between text-amber-400 text-xs">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-amber-400" />
+                      Authorize Vercel Domain in Firebase Console
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-mono">
+                      1-Minute Fix
+                    </span>
+                  </div>
+
+                  <p className="text-slate-300 leading-relaxed">
+                    Google Firebase requires your deployment domain to be added to the Authorized Domains list before accepting OAuth sign-in.
+                  </p>
+
+                  <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-between gap-2">
+                    <div className="truncate">
+                      <div className="text-[9px] uppercase font-bold text-slate-400">Domain to authorize:</div>
+                      <div className="font-mono text-xs text-emerald-400 select-all font-semibold truncate">
+                        {currentHostname}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyDomain(currentHostname)}
+                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold shrink-0 transition flex items-center gap-1"
+                    >
+                      {domainCopied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+                      <span>{domainCopied ? 'Copied!' : 'Copy Domain'}</span>
+                    </button>
+                  </div>
+
+                  <ol className="list-decimal pl-4 space-y-1 text-slate-300">
+                    <li>
+                      Open{' '}
+                      <a
+                        href="https://console.firebase.google.com/project/gen-lang-client-0839554754/authentication/settings"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-amber-400 underline hover:text-amber-300 font-bold inline-flex items-center gap-1"
+                      >
+                        Firebase Console &gt; Settings &gt; Authorized Domains ↗
+                      </a>
+                    </li>
+                    <li>Under <b className="text-white">Authorized domains</b>, click <b className="text-white">Add domain</b>.</li>
+                    <li>Paste <code className="text-emerald-300 bg-slate-900 px-1 py-0.5 rounded">{currentHostname}</code> and click <b className="text-white">Save</b>.</li>
+                  </ol>
+
+                  <div className="pt-2 border-t border-slate-800 flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={handleMasterAdminLogin}
+                      className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-md"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Continue Right Now with Instant Showroom Access</span>
+                    </button>
+                    <span className="text-[10px] text-slate-400 text-center">
+                      Instant Showroom Access bypasses Google authorization and gives you full access to all bikes, sales, and accounts immediately.
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
