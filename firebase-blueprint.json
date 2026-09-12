@@ -1,0 +1,206 @@
+{
+  "entities": {
+    "Bike": {
+      "title": "Bike",
+      "description": "Showroom motorcycle inventory unit",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "make": { "type": "string" },
+        "model": { "type": "string" },
+        "year": { "type": "number" },
+        "regNumber": { "type": "string" },
+        "engineNumber": { "type": "string" },
+        "chassisNumber": { "type": "string" },
+        "color": { "type": "string" },
+        "status": { "type": "string" },
+        "purchaseCost": { "type": "number" },
+        "totalCost": { "type": "number" },
+        "expectedSalePrice": { "type": "number" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "make", "model", "engineNumber", "chassisNumber", "status", "userId"]
+    },
+    "Purchase": {
+      "title": "Purchase",
+      "description": "Motorcycle purchase record from seller",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "bikeId": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "purchaseDate": { "type": "string" },
+        "amount": { "type": "number" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "bikeId", "sellerId", "purchaseDate", "amount", "userId"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "Motorcycle sale transaction to customer",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "bikeId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "saleDate": { "type": "string" },
+        "salePrice": { "type": "number" },
+        "paymentType": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "bikeId", "customerId", "saleDate", "salePrice", "paymentType", "userId"]
+    },
+    "BikeExpense": {
+      "title": "BikeExpense",
+      "description": "Repair, part, or refurbishment expense on a bike",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "bikeId": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "bikeId", "amount", "date", "userId"]
+    },
+    "Documentation": {
+      "title": "Documentation",
+      "description": "Legal documents, transfer letters, excise registration records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "bikeId": { "type": "string" },
+        "fileStatus": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "bikeId", "userId"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer record with CNIC and phone",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "cnic": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "name", "phone", "cnic", "userId"]
+    },
+    "Seller": {
+      "title": "Seller",
+      "description": "Motorcycle seller record with CNIC and phone",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "cnic": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "name", "phone", "cnic", "userId"]
+    },
+    "FinanceAccount": {
+      "title": "FinanceAccount",
+      "description": "Installment loan account for a financed sale",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "saleId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "bikeId": { "type": "string" },
+        "totalFinancedAmount": { "type": "number" },
+        "balanceRemaining": { "type": "number" },
+        "status": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "saleId", "customerId", "bikeId", "totalFinancedAmount", "userId"]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "Payment receipt record against installment or sale",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "amount", "date", "userId"]
+    },
+    "CashbookEntry": {
+      "title": "CashbookEntry",
+      "description": "Showroom ledger cash in / cash out entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "type": { "type": "string" },
+        "amount": { "type": "number" },
+        "description": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "date", "type", "amount", "description", "userId"]
+    },
+    "ShowroomSettings": {
+      "title": "ShowroomSettings",
+      "description": "Showroom name, address, NTN, contact info and defaults",
+      "type": "object",
+      "properties": {
+        "showroomName": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["showroomName", "userId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/bikes/{bikeId}": {
+      "schema": { "$ref": "#/entities/Bike" },
+      "description": "Motorcycle inventory documents"
+    },
+    "/users/{userId}/purchases/{purchaseId}": {
+      "schema": { "$ref": "#/entities/Purchase" },
+      "description": "Purchase transaction records"
+    },
+    "/users/{userId}/sales/{saleId}": {
+      "schema": { "$ref": "#/entities/Sale" },
+      "description": "Sale transaction records"
+    },
+    "/users/{userId}/expenses/{expenseId}": {
+      "schema": { "$ref": "#/entities/BikeExpense" },
+      "description": "Bike repair and part expense records"
+    },
+    "/users/{userId}/documents/{docId}": {
+      "schema": { "$ref": "#/entities/Documentation" },
+      "description": "Vehicle documentation files and excise status"
+    },
+    "/users/{userId}/customers/{customerId}": {
+      "schema": { "$ref": "#/entities/Customer" },
+      "description": "Customer directory"
+    },
+    "/users/{userId}/sellers/{sellerId}": {
+      "schema": { "$ref": "#/entities/Seller" },
+      "description": "Seller directory"
+    },
+    "/users/{userId}/financeAccounts/{financeId}": {
+      "schema": { "$ref": "#/entities/FinanceAccount" },
+      "description": "Installment finance accounts"
+    },
+    "/users/{userId}/payments/{paymentId}": {
+      "schema": { "$ref": "#/entities/Payment" },
+      "description": "Payment records"
+    },
+    "/users/{userId}/cashbook/{cashbookId}": {
+      "schema": { "$ref": "#/entities/CashbookEntry" },
+      "description": "Cashbook ledger transactions"
+    },
+    "/users/{userId}/settings/{settingsId}": {
+      "schema": { "$ref": "#/entities/ShowroomSettings" },
+      "description": "Showroom configuration settings"
+    }
+  }
+}

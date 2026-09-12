@@ -42,6 +42,7 @@ import { ReceiptModal } from './components/ReceiptModal';
 import { SettingsModal } from './components/SettingsModal';
 import { AuthView } from './components/AuthView';
 import { onAuthChange, logoutUser, getMasterSession } from './services/authService';
+import { cloudSyncService, CloudSyncStatus } from './services/cloudSyncService';
 import { User } from 'firebase/auth';
 import { RefreshCw, Bike as BikeIcon } from 'lucide-react';
 
@@ -52,6 +53,7 @@ export default function App() {
   // Authentication State
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<CloudSyncStatus>(cloudSyncService.getStatus());
 
   // Global State Stores
   const [bikes, setBikes] = useState<Bike[]>([]);
@@ -143,7 +145,50 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // Subscribe to Cloud Sync status changes
+  useEffect(() => {
+    const unsubscribe = cloudSyncService.subscribeStatus((status) => {
+      setCloudSyncStatus(status);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Real-time automatic Firestore sync across all browsers and devices
+  useEffect(() => {
+    if (!currentUser?.uid) return;
+
+    const stopSync = cloudSyncService.startRealtimeSync(currentUser.uid, () => {
+      refreshAllData();
+    });
+
+    return () => {
+      stopSync();
+    };
+  }, [currentUser?.uid, refreshAllData]);
+
+  // Background cloud push after local state changes
+  const triggerBackgroundCloudPush = useCallback(() => {
+    if (!currentUser?.uid) return;
+    // Debounced or non-blocking push
+    setTimeout(() => {
+      cloudSyncService.pushAllToCloud(currentUser.uid).catch((err) => {
+        console.warn('Background cloud sync:', err);
+      });
+    }, 200);
+  }, [currentUser?.uid]);
+
+  const handleTriggerCloudSync = async () => {
+    if (!currentUser?.uid) return;
+    const res = await cloudSyncService.pushAllToCloud(currentUser.uid);
+    if (res.success) {
+      alert(`Showroom Cloud Sync Completed!\n\nAll ${res.count} records (bikes, sales, accounts, cashbook) are synchronized across all your browsers and devices.`);
+    } else {
+      alert(`Cloud sync notice: ${res.error || 'Failed to complete cloud push'}`);
+    }
+  };
+
   const handleLogout = async () => {
+    cloudSyncService.stopRealtimeSync();
     try {
       await logoutUser();
       setCurrentUser(null);
@@ -156,22 +201,26 @@ export default function App() {
   const handleAddPurchase = async (params: any) => {
     const res = await dbManager.createPurchaseTransaction(params);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleUpdateBikeStatus = async (bikeId: string, status: BikeStatus) => {
     await dbManager.updateBikeStatus(bikeId, status);
     await refreshAllData();
+    triggerBackgroundCloudPush();
   };
 
   const handleUpdateBike = async (bike: Bike) => {
     await dbManager.updateBike(bike);
     await refreshAllData();
+    triggerBackgroundCloudPush();
   };
 
   const handleAddSale = async (params: any) => {
     const res = await dbManager.createSaleTransaction(params);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     // Open receipt modal automatically
     if (res.saleId) {
       const sale = await dbManager.getSaleById(res.saleId);
@@ -183,80 +232,94 @@ export default function App() {
   const handleAddExpense = async (params: any) => {
     const res = await dbManager.createBikeExpenseTransaction(params);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleUpdateExpense = async (expense: BikeExpense) => {
     const res = await dbManager.updateBikeExpenseTransaction(expense);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleDeleteExpense = async (expenseId: string) => {
     const res = await dbManager.deleteBikeExpenseTransaction(expenseId);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleUpdateDocuments = async (doc: Documentation) => {
     const res = await dbManager.updateDocumentation(doc);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleAddCustomer = async (cust: any) => {
     const res = await dbManager.addCustomer(cust);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleUpdateCustomer = async (cust: Customer) => {
     await dbManager.updateCustomer(cust);
     await refreshAllData();
+    triggerBackgroundCloudPush();
   };
 
   const handleReceivePayment = async (params: any) => {
     const res = await dbManager.receiveCustomerPayment(params);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleAddSeller = async (sel: any) => {
     const res = await dbManager.addSeller(sel);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleUpdateSeller = async (sel: Seller) => {
     await dbManager.updateSeller(sel);
     await refreshAllData();
+    triggerBackgroundCloudPush();
   };
 
   const handleUpdatePurchase = async (purchase: Purchase) => {
     await dbManager.updatePurchase(purchase);
     await refreshAllData();
+    triggerBackgroundCloudPush();
   };
 
   const handleUpdateSale = async (sale: Sale) => {
     await dbManager.updateSale(sale);
     await refreshAllData();
+    triggerBackgroundCloudPush();
   };
 
   const handlePayInstallment = async (params: any) => {
     const res = await dbManager.payInstallmentTransaction(params);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleAddManualCashbook = async (params: any) => {
     const res = await dbManager.addManualCashbookEntry(params);
     await refreshAllData();
+    triggerBackgroundCloudPush();
     return res;
   };
 
   const handleSaveSettings = async (newSettings: ShowroomSettings) => {
     await dbManager.saveSettings(newSettings);
     setSettings(newSettings);
+    triggerBackgroundCloudPush();
   };
 
   // Quick helper counts
@@ -315,6 +378,8 @@ export default function App() {
         onOpenTestSimulation={() => setIsTestModalOpen(true)}
         user={currentUser}
         onLogout={handleLogout}
+        cloudSyncStatus={cloudSyncStatus}
+        onTriggerCloudSync={handleTriggerCloudSync}
       />
 
       {/* Main Workspace Layout */}
@@ -472,7 +537,7 @@ export default function App() {
           )}
 
           {currentTab === 'backup' && (
-            <BackupRestoreView onRefreshData={refreshAllData} />
+            <BackupRestoreView onRefreshData={refreshAllData} currentUser={currentUser} />
           )}
 
           {currentTab === 'health' && (

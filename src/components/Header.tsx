@@ -13,6 +13,7 @@ import {
   Cloud,
   LogOut,
   User as UserIcon,
+  RefreshCw,
 } from 'lucide-react';
 import { Language, ShowroomSettings } from '../types';
 import { formatPKDateTime, getCurrentDate, getCurrentTime } from '../utils/formatters';
@@ -30,6 +31,12 @@ interface HeaderProps {
   onOpenSettings?: () => void;
   user?: { email?: string | null; displayName?: string | null } | null;
   onLogout?: () => void;
+  cloudSyncStatus?: {
+    isSyncing: boolean;
+    lastSyncedAt: Date | null;
+    error: string | null;
+  };
+  onTriggerCloudSync?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -45,6 +52,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings = () => {},
   user,
   onLogout,
+  cloudSyncStatus,
+  onTriggerCloudSync,
 }) => {
   const [clock, setClock] = useState('');
   const handleTestModal = onOpenTestSimulation || onOpenTestModal || (() => {});
@@ -139,6 +148,36 @@ export const Header: React.FC<HeaderProps> = ({
               title="Switch Language (English / اردو)"
             >
               {language === 'en' ? 'اردو' : 'English'}
+            </button>
+
+            {/* Real-time Cloud Sync Status & Trigger */}
+            <button
+              id="header-cloud-sync-btn"
+              onClick={onTriggerCloudSync}
+              disabled={cloudSyncStatus?.isSyncing}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition shadow-sm ${
+                cloudSyncStatus?.isSyncing
+                  ? 'bg-amber-950/60 text-amber-300 border-amber-800/60'
+                  : cloudSyncStatus?.error
+                  ? 'bg-rose-950/60 text-rose-300 border-rose-800/60'
+                  : 'bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-300 border-emerald-800/60'
+              }`}
+              title={
+                cloudSyncStatus?.isSyncing
+                  ? 'Syncing showroom database with Cloud Firestore...'
+                  : cloudSyncStatus?.lastSyncedAt
+                  ? `Real-time Cloud Sync Active (Last synced: ${cloudSyncStatus.lastSyncedAt.toLocaleTimeString()}). Click to force push now.`
+                  : 'Real-time Cloud Sync. Click to push all data to Cloud now.'
+              }
+            >
+              {cloudSyncStatus?.isSyncing ? (
+                <RefreshCw className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+              ) : (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              )}
+              <span className="hidden sm:inline">
+                {cloudSyncStatus?.isSyncing ? 'Syncing...' : 'Cloud Sync'}
+              </span>
             </button>
 
             {/* Google Drive Cloud Quick Access */}

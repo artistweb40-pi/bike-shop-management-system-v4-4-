@@ -18,26 +18,85 @@ import {
   FileText,
   Printer,
   Image as ImageIcon,
+  Cloud,
 } from 'lucide-react';
 import { dbManager } from '../db/indexedDB';
 import { formatPKDateTime, getCurrentDate, getCurrentTime } from '../utils/formatters';
 import { generateFullBackupPDF, generateInventoryPhotoCatalogPDF } from '../utils/pdfGenerator';
 import { GoogleDriveSync } from './GoogleDriveSync';
+import { cloudSyncService, CloudSyncStatus } from '../services/cloudSyncService';
 
 interface BackupRestoreViewProps {
   onRefreshData: () => void;
+  currentUser?: { uid?: string; email?: string | null; displayName?: string | null } | null;
 }
 
 export const BackupRestoreView: React.FC<BackupRestoreViewProps> = ({
   onRefreshData,
+  currentUser,
 }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isExportingCatalog, setIsExportingCatalog] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
+  const [cloudStatus, setCloudStatus] = useState<CloudSyncStatus>(cloudSyncService.getStatus());
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [importedBackupData, setImportedBackupData] = useState<any | null>(null);
+
+  React.useEffect(() => {
+    const unsub = cloudSyncService.subscribeStatus((st) => setCloudStatus(st));
+    return () => unsub();
+  }, []);
+
+  const handleForceCloudPush = async () => {
+    if (!currentUser?.uid) {
+      setMessage({ type: 'error', text: 'You must be signed in to sync data to the Cloud.' });
+      return;
+    }
+    setIsCloudSyncing(true);
+    setMessage(null);
+    try {
+      const res = await cloudSyncService.pushAllToCloud(currentUser.uid);
+      if (res.success) {
+        setMessage({
+          type: 'success',
+          text: `Cloud synchronization successful! ${res.count} showroom records saved in Firestore.`,
+        });
+      } else {
+        setMessage({
+          type: 'error',
+          text: res.error || 'Failed to sync with cloud.',
+        });
+      }
+    } finally {
+      setIsCloudSyncing(false);
+    }
+  };
+
+  const handleForceCloudPull = async () => {
+    if (!currentUser?.uid) {
+      setMessage({ type: 'error', text: 'You must be signed in to sync data from the Cloud.' });
+      return;
+    }
+    setIsCloudSyncing(true);
+    setMessage(null);
+    try {
+      await cloudSyncService.reconcileInitialSync(currentUser.uid, onRefreshData);
+      setMessage({
+        type: 'success',
+        text: 'Latest showroom data fetched and synchronized from Cloud!',
+      });
+    } catch (err: any) {
+      setMessage({
+        type: 'error',
+        text: err.message || 'Failed to fetch from cloud.',
+      });
+    } finally {
+      setIsCloudSyncing(false);
+    }
+  };
 
   // Export Complete Backup JSON
   const handleExportBackup = async () => {
@@ -242,6 +301,73 @@ export const BackupRestoreView: React.FC<BackupRestoreViewProps> = ({
 
       {/* Google Drive Cloud Integration */}
       <GoogleDriveSync onDataRestored={onRefreshData} />
+
+      {/* Cloud Firestore Real-Time Auto-Sync Panel */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/30 rounded-2xl p-5 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
+              <Cloud className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-black text-white">Real-Time Cloud Synchronization (Firestore)</h2>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live Sync Active
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Automatically saves and mirrors all bikes, sales, customers, installment accounts, and cashbook records to Google Cloud Firestore in real time.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleForceCloudPush}
+              disabled={isCloudSyncing || !currentUser?.uid}
+              className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md"
+              title="Push all local IndexedDB records to Firestore cloud"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isCloudSyncing ? 'animate-spin' : ''}`} />
+              <span>{isCloudSyncing ? 'Syncing...' : 'Sync Local Data to Cloud'}</span>
+            </button>
+            <button
+              onClick={handleForceCloudPull}
+              disabled={isCloudSyncing || !currentUser?.uid}
+              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-2 border border-slate-700"
+              title="Fetch latest cloud database records from Firestore into this browser"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Pull from Cloud</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80 text-xs">
+          <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+            <span className="text-slate-400 block text-[11px]">Synced Account:</span>
+            <span className="font-semibold text-slate-200 truncate block">
+              {currentUser?.email || currentUser?.displayName || 'Not signed in'}
+            </span>
+          </div>
+          <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+            <span className="text-slate-400 block text-[11px]">Last Cloud Sync:</span>
+            <span className="font-semibold text-emerald-400 block">
+              {cloudStatus.lastSyncedAt
+                ? cloudStatus.lastSyncedAt.toLocaleTimeString()
+                : 'Active (Real-time listener attached)'}
+            </span>
+          </div>
+          <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+            <span className="text-slate-400 block text-[11px]">Cross-Device Sync:</span>
+            <span className="font-semibold text-amber-400 block">
+              Enabled across all browsers & tabs
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* Grid: Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

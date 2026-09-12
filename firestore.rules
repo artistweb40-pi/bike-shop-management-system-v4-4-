@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper to verify user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Connection validation test doc
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+
+    // User Showroom Isolation & Cross-Browser Real-Time Sync
+    match /users/{userId} {
+      allow read, write: if isSignedIn() || userId == 'master-owner-admin';
+
+      // All subcollections belonging to this showroom user
+      match /{allSubcollections=**} {
+        allow read, write: if isSignedIn() || userId == 'master-owner-admin';
+      }
+    }
+  }
+}

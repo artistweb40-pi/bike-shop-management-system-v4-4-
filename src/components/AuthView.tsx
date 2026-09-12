@@ -457,9 +457,9 @@ export const AuthView: React.FC<AuthViewProps> = ({
 
             {/* Quick Demo Helper */}
             <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
-              <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Firebase Auth & Vercel Ready
+              <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Real-Time Cloud Sync Enabled
               </span>
               <button
                 type="button"
@@ -468,6 +468,10 @@ export const AuthView: React.FC<AuthViewProps> = ({
               >
                 Sample Credentials
               </button>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-[11px] text-slate-400 leading-relaxed text-center">
+              💡 <span className="text-slate-300 font-medium">Multi-Browser Sync:</span> Open this app in another browser (Chrome, Firefox, mobile) and log in. All bikes, sales, and accounts update automatically across both devices.
             </div>
           </div>
         </div>

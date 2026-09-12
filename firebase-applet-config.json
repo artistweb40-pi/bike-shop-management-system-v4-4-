@@ -3,6 +3,7 @@
   "appId": "1:1031608680461:web:eb9d005e46bb9a76a79544",
   "apiKey": "AIzaSyC4wmlOq_kW-r2NDF5ODfPDxOVLJuuNP4o",
   "authDomain": "gen-lang-client-0839554754.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-bikeshopmanageme-aa3370d1-f164-436b-af7d-e65dde927e22",
   "storageBucket": "gen-lang-client-0839554754.firebasestorage.app",
   "messagingSenderId": "1031608680461",
   "measurementId": "",
