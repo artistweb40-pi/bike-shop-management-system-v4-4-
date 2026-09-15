@@ -37,6 +37,7 @@ interface SidebarProps {
   pendingDocsCount?: number;
   overdueInstallmentsCount?: number;
   onOpenSettings?: () => void;
+  onCloseMobileDrawer?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -49,6 +50,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   pendingDocsCount,
   overdueInstallmentsCount,
   onOpenSettings,
+  onCloseMobileDrawer,
 }) => {
   const isUrdu = language === 'ur';
   const active = currentTab || activeTab || 'dashboard';
@@ -155,6 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 } else {
                   onSelectTab(item.id);
                 }
+                onCloseMobileDrawer?.();
               }}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                 isActive

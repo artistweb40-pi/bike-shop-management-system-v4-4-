@@ -112,7 +112,7 @@ export const CashbookView: React.FC<CashbookViewProps> = ({
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow-lg font-bold"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow-lg w-full sm:w-auto"
         >
           <PlusCircle className="w-4 h-4" />
           <span>+ Manual Cash Entry</span>
@@ -157,7 +157,7 @@ export const CashbookView: React.FC<CashbookViewProps> = ({
 
       {/* Filter Toolbar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-3 rounded-2xl shadow-md">
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar w-full sm:w-auto pb-1 sm:pb-0">
           {[
             { id: 'ALL', label: 'All Transactions' },
             { id: 'IN', label: 'Cash Inflow (+)' },
@@ -166,7 +166,7 @@ export const CashbookView: React.FC<CashbookViewProps> = ({
             <button
               key={tab.id}
               onClick={() => setTypeFilter(tab.id as any)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
                 typeFilter === tab.id
                   ? 'bg-amber-500 text-slate-950 shadow-md'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -191,45 +191,55 @@ export const CashbookView: React.FC<CashbookViewProps> = ({
 
       {/* Entries Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[320px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4">Transaction ID</th>
-                <th className="py-3 px-4">Date & Time</th>
-                <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Description & Ref</th>
-                <th className="py-3 px-4">Method</th>
-                <th className="py-3 px-4 text-right">Inflow (PKR)</th>
-                <th className="py-3 px-4 text-right">Outflow (PKR)</th>
+                <th className="py-3 px-3 sm:px-4">Txn ID</th>
+                <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Date & Time</th>
+                <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Category</th>
+                <th className="py-3 px-3 sm:px-4">Description & Ref</th>
+                <th className="py-3 px-3 sm:px-4 hidden lg:table-cell">Method</th>
+                <th className="py-3 px-3 sm:px-4 text-right">Inflow</th>
+                <th className="py-3 px-3 sm:px-4 text-right">Outflow</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
               {filteredEntries.length > 0 ? (
                 filteredEntries.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-800/40 transition">
-                    <td className="py-3 px-4 font-mono font-bold text-amber-400">{item.id}</td>
-                    <td className="py-3 px-4 text-slate-300">{formatPKDateTime(item.date, item.time)}</td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-3 sm:px-4 font-mono font-bold text-amber-400">
+                      {item.id}
+                      <div className="sm:hidden text-[10px] text-slate-400 font-sans mt-0.5">
+                        {item.date}
+                      </div>
+                      <div className="md:hidden mt-1">
+                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                          {item.category}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 sm:px-4 text-slate-300 hidden sm:table-cell">{formatPKDateTime(item.date, item.time)}</td>
+                    <td className="py-3 px-3 sm:px-4 hidden md:table-cell">
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
                         {item.category}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-200">
+                    <td className="py-3 px-3 sm:px-4 text-slate-200">
                       <div>{item.description}</div>
                       {item.referenceId && (
                         <div className="text-[10px] font-mono text-slate-400">Ref: {item.referenceId}</div>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-slate-300 font-medium">{item.paymentMethod}</td>
+                    <td className="py-3 px-3 sm:px-4 text-slate-300 font-medium hidden lg:table-cell">{item.paymentMethod}</td>
                     
                     {/* Inflow Column */}
-                    <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
+                    <td className="py-3 px-3 sm:px-4 text-right font-mono font-bold text-emerald-400">
                       {item.type === 'IN' ? formatPKR(item.amount) : '—'}
                     </td>
 
                     {/* Outflow Column */}
-                    <td className="py-3 px-4 text-right font-mono font-bold text-rose-400">
+                    <td className="py-3 px-3 sm:px-4 text-right font-mono font-bold text-rose-400">
                       {item.type === 'OUT' ? formatPKR(item.amount) : '—'}
                     </td>
                   </tr>

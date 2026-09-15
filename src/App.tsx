@@ -44,10 +44,22 @@ import { AuthView } from './components/AuthView';
 import { onAuthChange, logoutUser, getMasterSession } from './services/authService';
 import { cloudSyncService, CloudSyncStatus } from './services/cloudSyncService';
 import { User } from 'firebase/auth';
-import { RefreshCw, Bike as BikeIcon } from 'lucide-react';
+import {
+  RefreshCw,
+  Bike as BikeIcon,
+  Menu,
+  X,
+  Sparkles,
+  LogOut,
+  LayoutDashboard,
+  ShoppingCart,
+  Boxes,
+  TrendingUp,
+} from 'lucide-react';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<NavigationTab>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Authentication State
@@ -373,20 +385,67 @@ export default function App() {
       <Header
         settings={settings}
         activeTab={currentTab}
-        onSelectTab={setCurrentTab}
+        onSelectTab={(tab) => {
+          setCurrentTab(tab);
+          setIsMobileMenuOpen(false);
+        }}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onOpenTestSimulation={() => setIsTestModalOpen(true)}
         user={currentUser}
         onLogout={handleLogout}
         cloudSyncStatus={cloudSyncStatus}
         onTriggerCloudSync={handleTriggerCloudSync}
+        isMobileMenuOpen={isMobileMenuOpen}
+        onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />
 
+      {/* Mobile Quick Horizontal Category Scroll Bar (md:hidden) */}
+      <div className="md:hidden sticky top-16 z-20 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-3 py-2 overflow-x-auto custom-scrollbar flex items-center gap-1.5 shadow-md">
+        {[
+          { id: 'dashboard', label: 'Dashboard' },
+          { id: 'inventory', label: 'Stock / Bikes', badge: availableBikesCount > 0 ? `${availableBikesCount} Avail` : undefined },
+          { id: 'purchases', label: 'Purchases' },
+          { id: 'sales', label: 'Sales' },
+          { id: 'finance', label: 'Installments', badge: overdueInstallmentsCount > 0 ? `${overdueInstallmentsCount} Due` : undefined },
+          { id: 'cashbook', label: 'Cashbook' },
+          { id: 'expenses', label: 'Expenses' },
+          { id: 'documentation', label: 'Docs', badge: pendingDocsCount > 0 ? `${pendingDocsCount} Open` : undefined },
+          { id: 'customers', label: 'Customers' },
+          { id: 'sellers', label: 'Sellers' },
+          { id: 'reports', label: 'Reports' },
+          { id: 'backup', label: 'Cloud Sync' },
+        ].map((tab) => {
+          const isActive = currentTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setCurrentTab(tab.id as NavigationTab)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                isActive
+                  ? 'bg-amber-500 text-slate-950 shadow-md'
+                  : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <span>{tab.label}</span>
+              {tab.badge && (
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                    isActive ? 'bg-slate-950 text-amber-400' : 'bg-slate-700 text-amber-300'
+                  }`}
+                >
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Main Workspace Layout */}
-      <div className="flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 gap-6">
+      <div className="flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 gap-6 pb-24 md:pb-6">
         
-        {/* Navigation Sidebar */}
-        <div className="w-full md:w-64 shrink-0">
+        {/* Navigation Sidebar (Desktop only) */}
+        <div className="hidden md:block w-64 shrink-0">
           <Sidebar
             currentTab={currentTab}
             onSelectTab={setCurrentTab}
@@ -585,6 +644,148 @@ export default function App() {
           onLogout={handleLogout}
         />
       )}
+
+      {/* Mobile Slide-Over Navigation Drawer (md:hidden) */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex animate-fade-in">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Drawer Container */}
+          <div className="relative w-80 max-w-[85vw] bg-slate-900 border-r border-slate-800 h-full flex flex-col z-10 shadow-2xl">
+            {/* Drawer Header */}
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-black shadow shrink-0">
+                  <BikeIcon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-black text-white truncate">
+                    {settings.showroomName || 'Usman Trader & Autos'}
+                  </div>
+                  <div className="text-[10px] text-amber-400 font-semibold">Showroom Menu</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition shrink-0"
+                aria-label="Close Menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Drawer Body: Full 14-tab Sidebar */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+              <Sidebar
+                currentTab={currentTab}
+                onSelectTab={(tab) => {
+                  setCurrentTab(tab);
+                  setIsMobileMenuOpen(false);
+                }}
+                availableBikesCount={availableBikesCount}
+                pendingDocsCount={pendingDocsCount}
+                overdueInstallmentsCount={overdueInstallmentsCount}
+                onOpenSettings={() => {
+                  setIsSettingsModalOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                onCloseMobileDrawer={() => setIsMobileMenuOpen(false)}
+              />
+            </div>
+
+            {/* Drawer Footer Actions */}
+            <div className="p-3 border-t border-slate-800 bg-slate-950/80 space-y-2">
+              <button
+                onClick={() => {
+                  setIsTestModalOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 border border-indigo-700/60 transition shadow-sm min-h-[44px]"
+              >
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>A to Z Showroom QA Suite</span>
+              </button>
+
+              {currentUser && (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-800/50 transition shadow-sm min-h-[44px]"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Sticky Bottom Navigation Bar (md:hidden) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800 px-2 py-1 shadow-2xl flex items-center justify-around">
+        <button
+          onClick={() => setCurrentTab('dashboard')}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition min-w-[56px] min-h-[44px] ${
+            currentTab === 'dashboard' ? 'text-amber-400 font-black' : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <LayoutDashboard className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5">Home</span>
+        </button>
+
+        <button
+          onClick={() => setCurrentTab('inventory')}
+          className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-xl transition min-w-[56px] min-h-[44px] ${
+            currentTab === 'inventory' ? 'text-amber-400 font-black' : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Boxes className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5">Stock</span>
+          {availableBikesCount > 0 && (
+            <span className="absolute top-0.5 right-2 bg-emerald-500 text-slate-950 text-[9px] font-black rounded-full px-1.5 py-0.2">
+              {availableBikesCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setCurrentTab('purchases')}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition min-w-[56px] min-h-[44px] ${
+            currentTab === 'purchases' ? 'text-amber-400 font-black' : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <ShoppingCart className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5">Buy</span>
+        </button>
+
+        <button
+          onClick={() => setCurrentTab('sales')}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition min-w-[56px] min-h-[44px] ${
+            currentTab === 'sales' ? 'text-amber-400 font-black' : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <TrendingUp className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5">Sell</span>
+        </button>
+
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="relative flex flex-col items-center justify-center py-1 px-3 rounded-xl transition min-w-[56px] min-h-[44px] text-slate-400 hover:text-white"
+        >
+          <Menu className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5">Menu</span>
+          {(overdueInstallmentsCount > 0 || pendingDocsCount > 0) && (
+            <span className="absolute top-1 right-2.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+          )}
+        </button>
+      </nav>
 
     </div>
   );

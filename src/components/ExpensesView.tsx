@@ -181,7 +181,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
             setShowForm(!showForm);
             setMessage(null);
           }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white transition shadow-lg"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white transition shadow-lg w-full sm:w-auto"
         >
           {showForm ? '✕ Close Form' : '+ Add Bike Expense'}
         </button>
@@ -346,8 +346,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       )}
 
       {/* Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
           <div className="relative w-full sm:w-72">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -370,24 +370,24 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           </select>
         </div>
 
-        <div className="text-xs text-slate-400">
-          Filtered Sum: <b className="text-orange-400 font-mono text-sm">{formatPKR(totalExpenseAmount)}</b> ({filteredExpenses.length} entries)
+        <div className="text-xs text-slate-400 flex items-center justify-between sm:justify-end">
+          <span>Filtered Sum: <b className="text-orange-400 font-mono text-sm">{formatPKR(totalExpenseAmount)}</b> ({filteredExpenses.length} entries)</span>
         </div>
       </div>
 
       {/* Expenses Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[320px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4">Expense ID</th>
-                <th className="py-3 px-4">Date & Time</th>
-                <th className="py-3 px-4">Target Bike</th>
-                <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Description</th>
-                <th className="py-3 px-4 text-right">Amount (PKR)</th>
-                <th className="py-3 px-4 text-center">Actions</th>
+                <th className="py-3 px-3 sm:px-4">Expense ID</th>
+                <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Date & Time</th>
+                <th className="py-3 px-3 sm:px-4">Target Bike</th>
+                <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Category</th>
+                <th className="py-3 px-3 sm:px-4">Description</th>
+                <th className="py-3 px-3 sm:px-4 text-right">Amount</th>
+                <th className="py-3 px-3 sm:px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
@@ -396,25 +396,33 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                   const bike = bikeMap.get(exp.bikeId);
                   return (
                     <tr key={exp.id} className="hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4 font-mono font-bold text-amber-400">{exp.id}</td>
-                      <td className="py-3 px-4 text-slate-300">{formatPKDateTime(exp.date, exp.time)}</td>
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-slate-100">{exp.bikeId}</div>
-                        <div className="text-[11px] text-slate-400">{bike ? `${bike.make} ${bike.model} (Eng: ${bike.engineNumber})` : '—'}</div>
+                      <td className="py-3 px-3 sm:px-4 font-mono font-bold text-amber-400">
+                        {exp.id}
+                        <div className="sm:hidden text-[10px] text-slate-400 font-sans mt-0.5">{exp.date}</div>
+                        <div className="md:hidden mt-0.5">
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                            {exp.category}
+                          </span>
+                        </div>
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4 text-slate-300 hidden sm:table-cell">{formatPKDateTime(exp.date, exp.time)}</td>
+                      <td className="py-3 px-3 sm:px-4">
+                        <div className="font-bold text-slate-100">{exp.bikeId}</div>
+                        <div className="text-[11px] text-slate-400 truncate max-w-[130px] sm:max-w-xs">{bike ? `${bike.make} ${bike.model}` : '—'}</div>
+                      </td>
+                      <td className="py-3 px-3 sm:px-4 hidden md:table-cell">
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30">
                           {exp.category}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-slate-200">
+                      <td className="py-3 px-3 sm:px-4 text-slate-200">
                         <div>{exp.description}</div>
                         {exp.notes && <div className="text-[10px] text-slate-500">Note: {exp.notes}</div>}
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-orange-400">
+                      <td className="py-3 px-3 sm:px-4 text-right font-mono font-bold text-orange-400">
                         {formatPKR(exp.amount)}
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => startEdit(exp)}

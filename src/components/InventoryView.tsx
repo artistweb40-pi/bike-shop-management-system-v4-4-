@@ -199,23 +199,23 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       {/* View Mode 1: Table View */}
       {viewMode === 'table' ? (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse min-w-[320px]">
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  <th className="py-3 px-3">Photo</th>
-                  <th className="py-3 px-4">Bike ID</th>
-                  <th className="py-3 px-4">Make & Model</th>
-                  <th className="py-3 px-4">Specs & Color</th>
-                  <th className="py-3 px-4">Engine Number</th>
-                  <th className="py-3 px-4">Chassis Number</th>
-                  <th className="py-3 px-4">Registration</th>
-                  <th className="py-3 px-4">Papers Status</th>
-                  <th className="py-3 px-4 text-right">Purchase</th>
-                  <th className="py-3 px-4 text-right">Expenses</th>
-                  <th className="py-3 px-4 text-right">Total Cost</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-center">Actions</th>
+                  <th className="py-3 px-2 sm:px-3">Photo</th>
+                  <th className="py-3 px-3 sm:px-4">Bike ID</th>
+                  <th className="py-3 px-3 sm:px-4">Make & Model</th>
+                  <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Specs & Color</th>
+                  <th className="py-3 px-3 sm:px-4 hidden lg:table-cell">Engine Number</th>
+                  <th className="py-3 px-3 sm:px-4 hidden xl:table-cell">Chassis Number</th>
+                  <th className="py-3 px-3 sm:px-4 hidden lg:table-cell">Registration</th>
+                  <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Papers Status</th>
+                  <th className="py-3 px-3 sm:px-4 text-right hidden lg:table-cell">Purchase</th>
+                  <th className="py-3 px-3 sm:px-4 text-right hidden xl:table-cell">Expenses</th>
+                  <th className="py-3 px-3 sm:px-4 text-right">Total Cost</th>
+                  <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Status</th>
+                  <th className="py-3 px-3 sm:px-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-xs">
@@ -230,21 +230,21 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       <tr key={bike.id} className="hover:bg-slate-800/40 transition">
                         
                         {/* Bike Photo Thumbnail */}
-                        <td className="py-2.5 px-3">
+                        <td className="py-2.5 px-2 sm:px-3">
                           {bike.photoBlob ? (
                             <img
                               src={bike.photoBlob}
                               alt={`${bike.make} ${bike.model}`}
                               onClick={() => onViewImage(bike.photoBlob!, `${bike.make} ${bike.model} (${bike.id})`)}
-                              className="w-12 h-10 object-cover rounded-lg border border-slate-700 cursor-pointer hover:scale-105 transition shadow"
+                              className="w-10 h-8 sm:w-12 sm:h-10 object-cover rounded-lg border border-slate-700 cursor-pointer hover:scale-105 transition shadow"
                               title="Click to view full photo"
                             />
                           ) : (
                             <label
                               title="Click to attach photo"
-                              className="w-12 h-10 rounded-lg border border-dashed border-slate-700 hover:border-amber-400/60 bg-slate-800/60 flex flex-col items-center justify-center cursor-pointer text-slate-500 hover:text-amber-400 transition"
+                              className="w-10 h-8 sm:w-12 sm:h-10 rounded-lg border border-dashed border-slate-700 hover:border-amber-400/60 bg-slate-800/60 flex flex-col items-center justify-center cursor-pointer text-slate-500 hover:text-amber-400 transition"
                             >
-                              <Camera className="w-4 h-4" />
+                              <Camera className="w-3.5 h-3.5" />
                               <input
                                 type="file"
                                 accept="image/*"
@@ -256,34 +256,53 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         </td>
 
                         {/* Bike ID */}
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-3 sm:px-4">
                           <span className="font-mono font-bold text-amber-400">{bike.id}</span>
                           <div className="text-[10px] text-slate-500">{formatShortDate(bike.createdAt)}</div>
                         </td>
 
                         {/* Make & Model */}
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-3 sm:px-4">
                           <div className="font-extrabold text-slate-100">{bike.make} {bike.model}</div>
                           <div className="text-[11px] text-slate-400">{bike.condition}</div>
+                          <div className="md:hidden text-[10px] text-slate-400">
+                            {bike.year} · {bike.color}
+                          </div>
+                          <div className="lg:hidden text-[10px] text-amber-400/90 font-mono">
+                            Eng: {bike.engineNumber}
+                          </div>
+                          <div className="sm:hidden mt-1">
+                            <span
+                              className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border ${
+                                bike.status === 'Available'
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                  : bike.status === 'Sold'
+                                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                                  : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                              }`}
+                            >
+                              {bike.status}
+                            </span>
+                          </div>
                         </td>
 
-                        {/* Specs */}
-                        <td className="py-3 px-4 text-slate-300">
+                        {/* Specs (md+) */}
+                        <td className="py-3 px-3 sm:px-4 text-slate-300 hidden md:table-cell">
                           <div>{bike.year} · {bike.color}</div>
                         </td>
 
-                        {/* Engine */}
-                        <td className="py-3 px-4 font-mono text-[11px] text-amber-300">
+                        {/* Engine (lg+) */}
+                        <td className="py-3 px-3 sm:px-4 font-mono text-[11px] text-amber-300 hidden lg:table-cell">
                           <code>{bike.engineNumber}</code>
                         </td>
 
-                        {/* Chassis */}
-                        <td className="py-3 px-4 font-mono text-[11px] text-slate-300">
+                        {/* Chassis (xl+) */}
+                        <td className="py-3 px-3 sm:px-4 font-mono text-[11px] text-slate-300 hidden xl:table-cell">
                           <code>{bike.chassisNumber}</code>
                         </td>
 
-                        {/* Registration */}
-                        <td className="py-3 px-4">
+                        {/* Registration (lg+) */}
+                        <td className="py-3 px-3 sm:px-4 hidden lg:table-cell">
                           {bike.registrationNumber ? (
                             <span className="font-bold text-slate-200">{bike.registrationNumber}</span>
                           ) : (
@@ -291,8 +310,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                           )}
                         </td>
 
-                        {/* Documentation Status */}
-                        <td className="py-3 px-4">
+                        {/* Documentation Status (md+) */}
+                        <td className="py-3 px-3 sm:px-4 hidden md:table-cell">
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                               doc?.registrationStatus === 'Open'
@@ -307,13 +326,13 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                           )}
                         </td>
 
-                        {/* Purchase Cost */}
-                        <td className="py-3 px-4 text-right text-slate-300 font-mono">
+                        {/* Purchase Cost (lg+) */}
+                        <td className="py-3 px-3 sm:px-4 text-right text-slate-300 font-mono hidden lg:table-cell">
                           {formatPKR(bike.purchaseCost)}
                         </td>
 
-                        {/* Expenses */}
-                        <td className="py-3 px-4 text-right">
+                        {/* Expenses (xl+) */}
+                        <td className="py-3 px-3 sm:px-4 text-right hidden xl:table-cell">
                           <button
                             onClick={() => onOpenAddExpense(bike.id)}
                             className="font-mono text-orange-400 hover:underline font-bold"
@@ -324,14 +343,14 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         </td>
 
                         {/* Total Cost (Formula: Purchase + Expenses) */}
-                        <td className="py-3 px-4 text-right">
-                          <span className="font-black text-emerald-400 font-mono text-sm">
+                        <td className="py-3 px-3 sm:px-4 text-right">
+                          <span className="font-black text-emerald-400 font-mono text-xs sm:text-sm">
                             {formatPKR(calculatedTotalCost)}
                           </span>
                         </td>
 
-                        {/* Status */}
-                        <td className="py-3 px-4">
+                        {/* Status (sm+) */}
+                        <td className="py-3 px-3 sm:px-4 hidden sm:table-cell">
                           <select
                             value={bike.status}
                             onChange={(e) => onUpdateBikeStatus(bike.id, e.target.value as BikeStatus)}
@@ -353,7 +372,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-3 px-3 sm:px-4 text-center">
                           <div className="flex items-center justify-center gap-1.5">
                             {/* Details Modal */}
                             <button

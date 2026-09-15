@@ -268,7 +268,7 @@ export const PurchasesView: React.FC<PurchasesViewProps> = ({
             setErrorMessage('');
             setSuccessMessage('');
           }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg ${
+          className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-lg w-full sm:w-auto ${
             showForm
               ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
               : 'bg-emerald-600 hover:bg-emerald-500 text-white'
@@ -798,8 +798,8 @@ export const PurchasesView: React.FC<PurchasesViewProps> = ({
       )}
 
       {/* Filter / Search Bar */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative max-w-sm w-full">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -809,26 +809,26 @@ export const PurchasesView: React.FC<PurchasesViewProps> = ({
             className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500"
           />
         </div>
-        <div className="text-xs text-slate-400">
-          Showing <b>{filteredPurchases.length}</b> purchases
+        <div className="text-xs text-slate-400 flex items-center justify-between sm:justify-end">
+          <span>Showing <b>{filteredPurchases.length}</b> purchases</span>
         </div>
       </div>
 
       {/* Purchases Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[320px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4">Purchase ID</th>
-                <th className="py-3 px-4">Date & Time</th>
-                <th className="py-3 px-4">Bike Details</th>
-                <th className="py-3 px-4">Engine / Chassis</th>
-                <th className="py-3 px-4">Seller & CNIC</th>
-                <th className="py-3 px-4 text-right">Purchase Cost</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-center">Images</th>
-                <th className="py-3 px-4 text-center">Actions</th>
+                <th className="py-3 px-3 sm:px-4">Purchase / ID</th>
+                <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Date & Time</th>
+                <th className="py-3 px-3 sm:px-4">Bike Details</th>
+                <th className="py-3 px-3 sm:px-4 hidden lg:table-cell">Engine / Chassis</th>
+                <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Seller & CNIC</th>
+                <th className="py-3 px-3 sm:px-4 text-right">Cost</th>
+                <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Status</th>
+                <th className="py-3 px-3 sm:px-4 text-center hidden lg:table-cell">Images</th>
+                <th className="py-3 px-3 sm:px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
@@ -840,7 +840,7 @@ export const PurchasesView: React.FC<PurchasesViewProps> = ({
                     <tr key={purchase.id} className="hover:bg-slate-800/40 transition">
                       
                       {/* Purchase ID & Bike ID */}
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4">
                         <div className="font-mono font-bold text-amber-400">{purchase.id}</div>
                         <button
                           onClick={() => onNavigateToBike(purchase.bikeId)}
@@ -848,27 +848,37 @@ export const PurchasesView: React.FC<PurchasesViewProps> = ({
                         >
                           {purchase.bikeId}
                         </button>
+                        <div className="sm:hidden text-[10px] text-slate-400 mt-0.5">
+                          {purchase.purchaseDate}
+                        </div>
                       </td>
 
-                      {/* Date & Time */}
-                      <td className="py-3 px-4 text-slate-300">
+                      {/* Date & Time (Desktop / Tablet) */}
+                      <td className="py-3 px-3 sm:px-4 text-slate-300 hidden sm:table-cell">
                         {formatPKDateTime(purchase.purchaseDate, purchase.purchaseTime)}
                       </td>
 
                       {/* Bike Details */}
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4">
                         <div className="font-bold text-slate-100">{bike?.make} {bike?.model}</div>
-                        <div className="text-[11px] text-slate-400">{bike?.year} · {bike?.color} · {bike?.condition}</div>
+                        <div className="text-[11px] text-slate-400">{bike?.year} · {bike?.color}</div>
+                        {/* Mobile supplementary details when lg/md columns hidden */}
+                        <div className="lg:hidden text-[10px] text-amber-400/90 font-mono mt-0.5">
+                          Eng: {bike?.engineNumber || '—'}
+                        </div>
+                        <div className="md:hidden text-[10px] text-slate-400 truncate max-w-[140px]">
+                          By: {seller?.name || 'Seller'}
+                        </div>
                       </td>
 
-                      {/* Engine & Chassis */}
-                      <td className="py-3 px-4 font-mono text-[11px]">
+                      {/* Engine & Chassis (lg+) */}
+                      <td className="py-3 px-3 sm:px-4 font-mono text-[11px] hidden lg:table-cell">
                         <div className="text-slate-200">Eng: <code>{bike?.engineNumber}</code></div>
                         <div className="text-slate-400">Chas: <code>{bike?.chassisNumber}</code></div>
                       </td>
 
-                      {/* Seller */}
-                      <td className="py-3 px-4">
+                      {/* Seller (md+) */}
+                      <td className="py-3 px-3 sm:px-4 hidden md:table-cell">
                         <div className="font-semibold text-slate-200">{seller?.name || 'Seller'}</div>
                         <div className="text-[11px] text-slate-400 font-mono">
                           {seller?.cnic || 'CNIC: —'}{seller?.phone ? ` · ${seller.phone}` : ''}
@@ -876,12 +886,23 @@ export const PurchasesView: React.FC<PurchasesViewProps> = ({
                       </td>
 
                       {/* Cost */}
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-3 sm:px-4 text-right">
                         <div className="font-black text-emerald-400">{formatPKR(purchase.purchaseCost)}</div>
+                        <div className="sm:hidden mt-0.5">
+                          <span
+                            className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border ${
+                              bike?.status === 'Available'
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                : 'bg-slate-700/60 text-slate-300 border-slate-600'
+                            }`}
+                          >
+                            {bike?.status || 'Stock'}
+                          </span>
+                        </div>
                       </td>
 
-                      {/* Inventory Status */}
-                      <td className="py-3 px-4">
+                      {/* Inventory Status (sm+) */}
+                      <td className="py-3 px-3 sm:px-4 hidden sm:table-cell">
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                             bike?.status === 'Available'
@@ -893,8 +914,8 @@ export const PurchasesView: React.FC<PurchasesViewProps> = ({
                         </span>
                       </td>
 
-                      {/* Images */}
-                      <td className="py-3 px-4 text-center">
+                      {/* Images (lg+) */}
+                      <td className="py-3 px-3 sm:px-4 text-center hidden lg:table-cell">
                         <div className="flex items-center justify-center gap-1.5">
                           {seller?.photoBlob && (
                             <button
@@ -930,7 +951,7 @@ export const PurchasesView: React.FC<PurchasesViewProps> = ({
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => setSelectedPurchase(purchase)}

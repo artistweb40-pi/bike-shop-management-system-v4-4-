@@ -302,7 +302,7 @@ export const SalesView: React.FC<SalesViewProps> = ({
             setSuccessMessage('');
           }}
           disabled={availableBikes.length === 0 && !showForm}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg ${
+          className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-lg w-full sm:w-auto ${
             showForm
               ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
               : availableBikes.length === 0
@@ -717,8 +717,8 @@ export const SalesView: React.FC<SalesViewProps> = ({
       )}
 
       {/* Sales Search Bar */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative max-w-sm w-full">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -728,27 +728,27 @@ export const SalesView: React.FC<SalesViewProps> = ({
             className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200"
           />
         </div>
-        <div className="text-xs text-slate-400">
-          Showing <b>{filteredSales.length}</b> completed sales
+        <div className="text-xs text-slate-400 flex items-center justify-between sm:justify-end">
+          <span>Showing <b>{filteredSales.length}</b> completed sales</span>
         </div>
       </div>
 
       {/* Sales Register Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[320px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4">Receipt / Sale ID</th>
-                <th className="py-3 px-4">Date & Time</th>
-                <th className="py-3 px-4">Customer & Phone</th>
-                <th className="py-3 px-4">Bike Details</th>
-                <th className="py-3 px-4">Engine / Chassis</th>
-                <th className="py-3 px-4 text-right">Sale Price</th>
-                <th className="py-3 px-4 text-right">Actual Cost</th>
-                <th className="py-3 px-4 text-right">Profit</th>
-                <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4 text-center">Actions</th>
+                <th className="py-3 px-3 sm:px-4">Receipt / ID</th>
+                <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Date & Time</th>
+                <th className="py-3 px-3 sm:px-4">Customer</th>
+                <th className="py-3 px-3 sm:px-4">Bike Details</th>
+                <th className="py-3 px-3 sm:px-4 hidden lg:table-cell">Engine / Chassis</th>
+                <th className="py-3 px-3 sm:px-4 text-right">Sale Price</th>
+                <th className="py-3 px-3 sm:px-4 text-right hidden xl:table-cell">Actual Cost</th>
+                <th className="py-3 px-3 sm:px-4 text-right hidden md:table-cell">Profit</th>
+                <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Type</th>
+                <th className="py-3 px-3 sm:px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
@@ -759,18 +759,21 @@ export const SalesView: React.FC<SalesViewProps> = ({
                     <tr key={sale.id} className="hover:bg-slate-800/40 transition">
                       
                       {/* Receipt & Sale ID */}
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4">
                         <div className="font-mono font-bold text-amber-400">{sale.receiptNo}</div>
                         <div className="text-[10px] font-mono text-slate-500">{sale.id}</div>
+                        <div className="sm:hidden text-[10px] text-slate-400 mt-0.5">
+                          {sale.saleDate}
+                        </div>
                       </td>
 
                       {/* Date & Time */}
-                      <td className="py-3 px-4 text-slate-300">
+                      <td className="py-3 px-3 sm:px-4 text-slate-300 hidden sm:table-cell">
                         {formatPKDateTime(sale.saleDate, sale.saleTime)}
                       </td>
 
                       {/* Customer */}
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4">
                         <div className="font-bold text-slate-100">{cust?.name || 'Walk-in'}</div>
                         <div className="text-[11px] text-slate-400 font-mono">
                           {cust?.cnic || 'CNIC: —'}{cust?.phone ? ` · ${cust.phone}` : ''}
@@ -778,36 +781,55 @@ export const SalesView: React.FC<SalesViewProps> = ({
                       </td>
 
                       {/* Bike */}
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4">
                         <div className="font-semibold text-slate-200">{sale.make} {sale.model}</div>
                         <div className="text-[11px] text-slate-400">{sale.bikeId}</div>
+                        <div className="lg:hidden text-[10px] text-amber-400/90 font-mono mt-0.5">
+                          Eng: {sale.engineNumber}
+                        </div>
+                        <div className="sm:hidden mt-1">
+                          <span
+                            className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border ${
+                              sale.saleType === 'Cash'
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                : sale.saleType === 'Installment'
+                                ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30'
+                                : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                            }`}
+                          >
+                            {sale.saleType}
+                          </span>
+                        </div>
                       </td>
 
-                      {/* Engine / Chassis */}
-                      <td className="py-3 px-4 font-mono text-[11px]">
+                      {/* Engine / Chassis (lg+) */}
+                      <td className="py-3 px-3 sm:px-4 font-mono text-[11px] hidden lg:table-cell">
                         <div className="text-amber-300">Eng: {sale.engineNumber}</div>
                         <div className="text-slate-400">Chas: {sale.chassisNumber}</div>
                       </td>
 
                       {/* Sale Price */}
-                      <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
+                      <td className="py-3 px-3 sm:px-4 text-right font-mono font-bold text-emerald-400">
                         {formatPKR(sale.salePrice)}
+                        <div className="md:hidden text-[10px] text-emerald-400/80 font-normal">
+                          P: +{formatPKR(sale.profit)}
+                        </div>
                       </td>
 
-                      {/* Actual Bike Cost */}
-                      <td className="py-3 px-4 text-right font-mono text-slate-400">
+                      {/* Actual Bike Cost (xl+) */}
+                      <td className="py-3 px-3 sm:px-4 text-right font-mono text-slate-400 hidden xl:table-cell">
                         {formatPKR(sale.actualBikeCost)}
                       </td>
 
-                      {/* Real Profit */}
-                      <td className="py-3 px-4 text-right">
+                      {/* Real Profit (md+) */}
+                      <td className="py-3 px-3 sm:px-4 text-right hidden md:table-cell">
                         <span className={`font-mono font-black ${sale.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                           {formatPKR(sale.profit)}
                         </span>
                       </td>
 
-                      {/* Sale Type */}
-                      <td className="py-3 px-4">
+                      {/* Sale Type (sm+) */}
+                      <td className="py-3 px-3 sm:px-4 hidden sm:table-cell">
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                             sale.saleType === 'Cash'
@@ -822,7 +844,7 @@ export const SalesView: React.FC<SalesViewProps> = ({
                       </td>
 
                       {/* Actions: View, Edit, Receipt */}
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => setSelectedSale(sale)}

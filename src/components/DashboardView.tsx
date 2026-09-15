@@ -152,11 +152,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             Real-time verified metrics calculated dynamically from local <b className="text-amber-400">IndexedDB</b> records.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
           <button
             id="dash-quick-purchase"
             onClick={onQuickPurchase}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md transition"
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md transition"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Buy Motorcycle</span>
@@ -164,7 +164,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <button
             id="dash-quick-sale"
             onClick={onQuickSale}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl shadow-md transition"
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl shadow-md transition"
           >
             <TrendingUp className="w-4 h-4" />
             <span>Sell Motorcycle</span>
@@ -362,7 +362,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 return (
                   <div
                     key={sale.id}
-                    className="p-3 bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 rounded-xl flex items-center justify-between transition"
+                    className="p-3 bg-slate-800/70 hover:bg-slate-800 border border-slate-700/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition"
                   >
                     <div>
                       <div className="text-xs font-bold text-slate-100 flex items-center gap-2">
@@ -375,7 +375,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         Customer: <b className="text-slate-300">{cust?.name || 'Walk-in'}</b> · Method: {sale.paymentMethod}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right border-t sm:border-t-0 border-slate-700/50 pt-1.5 sm:pt-0">
                       <div className="text-xs font-black text-emerald-400">{formatPKR(sale.salePrice)}</div>
                       <div className="text-[10px] text-slate-400">Profit: <span className="text-emerald-300 font-bold">{formatPKR(sale.profit)}</span></div>
                     </div>
@@ -412,7 +412,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {overdueList.map((item, idx) => (
                 <div
                   key={`${item.finance.id}-${item.installmentNo}-${idx}`}
-                  className="p-3 bg-rose-950/20 border border-rose-500/30 rounded-xl flex items-center justify-between"
+                  className="p-3 bg-rose-950/20 border border-rose-500/30 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                 >
                   <div>
                     <div className="text-xs font-bold text-slate-100 flex items-center gap-2">
@@ -426,11 +426,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {item.customerPhone && ` · Phone: ${item.customerPhone}`}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 border-t sm:border-t-0 border-rose-900/40 pt-1.5 sm:pt-0">
                     <div className="text-xs font-black text-rose-400">{formatPKR(item.dueAmount)}</div>
                     <button
                       onClick={() => handleNav('finance')}
-                      className="mt-1 px-2 py-0.5 text-[10px] font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded transition"
+                      className="px-2 py-1 text-[10px] font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded transition"
                     >
                       Collect Now
                     </button>

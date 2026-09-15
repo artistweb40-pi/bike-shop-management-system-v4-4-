@@ -147,7 +147,7 @@ export const SellersView: React.FC<SellersViewProps> = ({
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow-lg font-bold"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow-lg w-full sm:w-auto"
         >
           <PlusCircle className="w-4 h-4" />
           <span>+ Register Seller</span>
@@ -162,8 +162,8 @@ export const SellersView: React.FC<SellersViewProps> = ({
       )}
 
       {/* Filter and Search */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative max-w-sm w-full">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -173,24 +173,24 @@ export const SellersView: React.FC<SellersViewProps> = ({
             className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200"
           />
         </div>
-        <div className="text-xs text-slate-400">
-          Total Sellers: <b>{sellers.length}</b>
+        <div className="text-xs text-slate-400 flex items-center justify-between sm:justify-end">
+          <span>Total Sellers: <b>{sellers.length}</b></span>
         </div>
       </div>
 
       {/* Sellers Grid / Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[320px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4">Seller ID & Name</th>
-                <th className="py-3 px-4">CNIC & Phone</th>
-                <th className="py-3 px-4">Address</th>
-                <th className="py-3 px-4 text-center">Bikes Supplied</th>
-                <th className="py-3 px-4 text-right">Total Purchased Value</th>
-                <th className="py-3 px-4 text-center">Verified ID</th>
-                <th className="py-3 px-4 text-center">History</th>
+                <th className="py-3 px-3 sm:px-4">Seller & ID</th>
+                <th className="py-3 px-3 sm:px-4">CNIC & Phone</th>
+                <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Address</th>
+                <th className="py-3 px-3 sm:px-4 text-center hidden sm:table-cell">Bikes</th>
+                <th className="py-3 px-3 sm:px-4 text-right">Purchased Value</th>
+                <th className="py-3 px-3 sm:px-4 text-center hidden lg:table-cell">Verified ID</th>
+                <th className="py-3 px-3 sm:px-4 text-center">History</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
@@ -201,34 +201,34 @@ export const SellersView: React.FC<SellersViewProps> = ({
 
                   return (
                     <tr key={seller.id} className="hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4">
                         <div className="font-bold text-slate-100 flex items-center gap-2">
-                          <User className="w-4 h-4 text-amber-400" />
-                          <span>{seller.name}</span>
+                          <User className="w-4 h-4 text-amber-400 shrink-0" />
+                          <span className="truncate max-w-[120px] sm:max-w-none">{seller.name}</span>
                         </div>
                         <div className="text-[10px] font-mono text-slate-500">{seller.id}</div>
                       </td>
 
-                      <td className="py-3 px-4 font-mono">
+                      <td className="py-3 px-3 sm:px-4 font-mono">
                         <div className="text-amber-300">{seller.cnic || 'CNIC: —'}</div>
                         <div className="text-slate-400 text-[11px]">{seller.phone || 'No phone'}</div>
                       </td>
 
-                      <td className="py-3 px-4 text-slate-300 max-w-xs truncate">
+                      <td className="py-3 px-3 sm:px-4 text-slate-300 max-w-xs truncate hidden md:table-cell">
                         {seller.address || '—'}
                       </td>
 
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center hidden sm:table-cell">
                         <span className="font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-200">
                           {sellerPurchases.length}
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
+                      <td className="py-3 px-3 sm:px-4 text-right font-mono font-bold text-emerald-400">
                         {formatPKR(totalPurchasedValue)}
                       </td>
 
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center hidden lg:table-cell">
                         <div className="flex items-center justify-center gap-1.5">
                           {seller.photoBlob && (
                             <button
@@ -263,7 +263,7 @@ export const SellersView: React.FC<SellersViewProps> = ({
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => setSelectedSeller(seller)}

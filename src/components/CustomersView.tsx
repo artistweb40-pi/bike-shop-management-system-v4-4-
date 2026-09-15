@@ -188,7 +188,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition shadow-lg"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition shadow-lg w-full sm:w-auto"
         >
           <PlusCircle className="w-4 h-4" />
           <span>+ Register New Customer</span>
@@ -203,8 +203,8 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
       )}
 
       {/* Filter and Search */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative max-w-sm w-full">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -214,24 +214,24 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
             className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200"
           />
         </div>
-        <div className="text-xs text-slate-400">
-          Total Customers: <b>{customers.length}</b>
+        <div className="text-xs text-slate-400 flex items-center justify-between sm:justify-end">
+          <span>Total Customers: <b>{customers.length}</b></span>
         </div>
       </div>
 
       {/* Customers Grid / Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[320px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4">Customer</th>
-                <th className="py-3 px-4">CNIC & Phone</th>
-                <th className="py-3 px-4">Address</th>
-                <th className="py-3 px-4 text-center">Bikes Bought</th>
-                <th className="py-3 px-4 text-right">Outstanding Balance</th>
-                <th className="py-3 px-4 text-center">Identity</th>
-                <th className="py-3 px-4 text-center">Actions</th>
+                <th className="py-3 px-3 sm:px-4">Customer</th>
+                <th className="py-3 px-3 sm:px-4">CNIC & Phone</th>
+                <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Address</th>
+                <th className="py-3 px-3 sm:px-4 text-center hidden sm:table-cell">Bikes</th>
+                <th className="py-3 px-3 sm:px-4 text-right">Balance</th>
+                <th className="py-3 px-3 sm:px-4 text-center hidden lg:table-cell">Identity</th>
+                <th className="py-3 px-3 sm:px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
@@ -246,32 +246,32 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
                   return (
                     <tr key={cust.id} className="hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4">
                         <div className="font-bold text-slate-100 flex items-center gap-2">
-                          <User className="w-4 h-4 text-blue-400" />
-                          <span>{cust.name}</span>
+                          <User className="w-4 h-4 text-blue-400 shrink-0" />
+                          <span className="truncate max-w-[120px] sm:max-w-none">{cust.name}</span>
                         </div>
                         <div className="text-[10px] font-mono text-slate-500">{cust.id}</div>
                       </td>
 
-                      <td className="py-3 px-4 font-mono">
+                      <td className="py-3 px-3 sm:px-4 font-mono">
                         <div className="text-slate-200">{cust.cnic || 'CNIC: —'}</div>
                         <div className="text-slate-400 text-[11px]">{cust.phone || 'No phone'}</div>
                       </td>
 
-                      <td className="py-3 px-4 text-slate-300 max-w-xs truncate">
+                      <td className="py-3 px-3 sm:px-4 text-slate-300 max-w-xs truncate hidden md:table-cell">
                         {cust.address || '—'}
                       </td>
 
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center hidden sm:table-cell">
                         <span className="font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-200">
                           {custSales.length}
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-3 sm:px-4 text-right">
                         <span
-                          className={`font-mono font-black ${
+                          className={`font-mono font-black text-xs sm:text-sm ${
                             totalOutstanding > 0 ? 'text-rose-400' : 'text-emerald-400'
                           }`}
                         >
@@ -279,7 +279,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center hidden lg:table-cell">
                         <div className="flex items-center justify-center gap-1.5">
                           {cust.photoBlob && (
                             <button
@@ -311,7 +311,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => setSelectedCustomer(cust)}

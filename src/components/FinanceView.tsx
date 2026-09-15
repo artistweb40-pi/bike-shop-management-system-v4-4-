@@ -183,19 +183,19 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
 
       {/* Finance Accounts Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[320px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4">Account ID</th>
-                <th className="py-3 px-4">Customer & Phone</th>
-                <th className="py-3 px-4">Bike Details</th>
-                <th className="py-3 px-4 text-right">Total Financed</th>
-                <th className="py-3 px-4 text-right">Down Payment</th>
-                <th className="py-3 px-4 text-center">Installments</th>
-                <th className="py-3 px-4 text-right">Remaining Balance</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-center">Schedule</th>
+                <th className="py-3 px-3 sm:px-4">Account ID</th>
+                <th className="py-3 px-3 sm:px-4">Customer</th>
+                <th className="py-3 px-3 sm:px-4">Bike Details</th>
+                <th className="py-3 px-3 sm:px-4 text-right hidden md:table-cell">Total Financed</th>
+                <th className="py-3 px-3 sm:px-4 text-right hidden lg:table-cell">Down Payment</th>
+                <th className="py-3 px-3 sm:px-4 text-center">Installments</th>
+                <th className="py-3 px-3 sm:px-4 text-right">Balance</th>
+                <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Status</th>
+                <th className="py-3 px-3 sm:px-4 text-center">Schedule</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
@@ -211,37 +211,56 @@ export const FinanceView: React.FC<FinanceViewProps> = ({
 
                   return (
                     <tr key={acc.id} className="hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4 font-mono font-bold text-indigo-400">{acc.id}</td>
+                      <td className="py-3 px-3 sm:px-4 font-mono font-bold text-indigo-400">
+                        {acc.id}
+                        <div className="sm:hidden mt-0.5">
+                          <span
+                            className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border ${
+                              acc.status === 'PAID' || acc.schedule.every((x) => x.paid)
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                : hasOverdue
+                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                                : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30'
+                            }`}
+                          >
+                            {acc.status === 'PAID' || acc.schedule.every((x) => x.paid)
+                              ? 'Paid'
+                              : hasOverdue
+                              ? 'Overdue'
+                              : 'Active'}
+                          </span>
+                        </div>
+                      </td>
 
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4">
                         <div className="font-bold text-slate-100">{cust?.name || 'Customer'}</div>
                         <div className="text-[11px] text-slate-400 font-mono">{cust?.phone || 'No phone'}</div>
                       </td>
 
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4">
                         <div className="font-semibold text-slate-200">{acc.brand} {acc.model}</div>
                         <div className="text-[10px] text-slate-400 font-mono">{acc.bikeId}</div>
                       </td>
 
-                      <td className="py-3 px-4 text-right font-mono font-bold text-slate-200">
+                      <td className="py-3 px-3 sm:px-4 text-right font-mono font-bold text-slate-200 hidden md:table-cell">
                         {formatPKR(acc.totalPayable || acc.financedAmount || acc.bikePrice || 0)}
                       </td>
 
-                      <td className="py-3 px-4 text-right font-mono text-emerald-400">
+                      <td className="py-3 px-3 sm:px-4 text-right font-mono text-emerald-400 hidden lg:table-cell">
                         {formatPKR(acc.downPayment || 0)}
                       </td>
 
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-3 px-3 sm:px-4 text-center">
                         <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-                          {paidCount} / {totalCount}
+                          {paidCount}/{totalCount}
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 text-right font-mono font-black text-rose-400">
+                      <td className="py-3 px-3 sm:px-4 text-right font-mono font-black text-rose-400">
                         {formatPKR(remainingBal)}
                       </td>
 
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3 sm:px-4 hidden sm:table-cell">
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                             acc.status === 'PAID' || acc.schedule.every((x) => x.paid)
