@@ -139,6 +139,15 @@ export default function App() {
     refreshAllData();
   }, [refreshAllData]);
 
+  // Safety Watchdog: Never freeze on loading screen longer than 2.5s under any condition
+  useEffect(() => {
+    const watchdog = setTimeout(() => {
+      setAuthLoading(false);
+      setIsLoading(false);
+    }, 2500);
+    return () => clearTimeout(watchdog);
+  }, []);
+
   useEffect(() => {
     const master = getMasterSession();
     if (master) {
@@ -349,14 +358,14 @@ export default function App() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300 space-y-4">
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300 space-y-4 p-4">
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-xl flex items-center justify-center">
           <div className="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
             <BikeIcon className="w-6 h-6 text-emerald-400" />
           </div>
         </div>
         <RefreshCw className="w-7 h-7 text-emerald-400 animate-spin" />
-        <div className="text-center">
+        <div className="text-center max-w-xs">
           <h1 className="text-base font-black text-white tracking-tight">
             {settings.showroomName || 'Usman Trader and Autos'}
           </h1>
@@ -364,6 +373,16 @@ export default function App() {
             Loading showroom security & IndexedDB database...
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => {
+            setAuthLoading(false);
+            setIsLoading(false);
+          }}
+          className="mt-2 text-[11px] text-slate-400 hover:text-emerald-400 underline transition cursor-pointer"
+        >
+          Taking longer than usual? Click to open now
+        </button>
       </div>
     );
   }

@@ -128,10 +128,23 @@ export async function logoutUser(): Promise<void> {
 }
 
 /**
- * Listen to auth state changes
+ * Listen to auth state changes safely
  */
 export function onAuthChange(callback: (user: User | null) => void): () => void {
-  return onAuthStateChanged(auth, callback);
+  try {
+    return onAuthStateChanged(
+      auth,
+      (user) => callback(user),
+      (error) => {
+        console.warn('Firebase Auth state listener notice:', error);
+        callback(null);
+      }
+    );
+  } catch (err) {
+    console.warn('Firebase Auth onAuthStateChanged could not initialize:', err);
+    callback(null);
+    return () => {};
+  }
 }
 
 /**

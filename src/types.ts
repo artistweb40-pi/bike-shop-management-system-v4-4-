@@ -10,6 +10,7 @@ export type BikeStatus = 'Available' | 'Reserved' | 'Sold' | 'Returned' | 'Archi
 export type RegistrationStatus =
   | 'Open'
   | 'Registered'
+  | 'Pending'
   | 'Transfer Pending'
   | 'File Available'
   | 'File Missing'
@@ -41,7 +42,9 @@ export type TransactionType =
   | 'Bike Sale'
   | 'Customer Payment'
   | 'Other Income'
-  | 'Other Expense';
+  | 'Other Expense'
+  | 'IN'
+  | 'OUT';
 
 export type FinanceStatus = 'ACTIVE' | 'PAID' | 'OVERDUE';
 export type SaleType = 'Cash' | 'Installment' | 'Credit';
@@ -101,6 +104,8 @@ export interface Purchase {
   notes?: string;
   supplier?: string;
   invoiceNo?: string;
+  invoiceNumber?: string;
+  paymentMethod?: PaymentMethod | string;
   cashbookId?: string;
   createdAt: string;
 }
@@ -224,6 +229,7 @@ export interface InstallmentScheduleItem {
   paidDate?: string;
   paidMethod?: string;
   paymentId?: string;
+  status?: 'PAID' | 'PENDING' | 'OVERDUE';
 }
 
 export interface FinanceAccount {
@@ -260,7 +266,9 @@ export interface Payment {
   installmentNo?: number;
   amount: number;
   method: PaymentMethod;
+  paymentMethod?: PaymentMethod | string;
   note?: string;
+  notes?: string;
   cashbookId?: string;
   createdAt: string;
 }
@@ -274,6 +282,7 @@ export interface CashbookEntry {
   description: string;
   amount: number; // Positive for inflow, negative for outflow
   paymentMethod: string;
+  category?: string;
   account: 'Cash' | 'Bank' | 'Easypaisa' | 'JazzCash' | 'Other';
   createdAt: string;
 }
@@ -289,13 +298,18 @@ export interface AuditLog {
 
 export interface ShowroomSettings {
   shopName: string;
+  showroomName?: string;
   phone: string;
+  phone1?: string;
+  phone2?: string;
   address: string;
   city: string;
   currency: string;
+  currencySymbol?: string;
   ownerName: string;
   ntnNumber?: string;
   receiptTerms?: string;
+  receiptFooter?: string;
   excludeSensitiveImagesOnExport: boolean;
   language: Language;
   sequenceCounters: {

@@ -169,17 +169,31 @@ export class DatabaseManager {
         }
       };
 
-      request.onsuccess = async () => {
+      request.onblocked = () => {
+        console.warn('IndexedDB database open is blocked by another open tab or older version.');
+      };
+
+      request.onsuccess = () => {
         this.db = request.result;
-        try {
-          await this.reconcileCustomerBalances();
-        } catch {
-          // silently continue
-        }
+        this.db.onversionchange = () => {
+          console.warn('Database version change detected, closing old connection.');
+          this.db?.close();
+          this.db = null;
+          this.initPromise = null;
+        };
         resolve(this.db);
+
+        // Run background balance reconciliation asynchronously so getDB() resolves immediately
+        setTimeout(() => {
+          this.reconcileCustomerBalances().catch((err) => {
+            console.warn('Background balance reconciliation notice:', err);
+          });
+        }, 50);
       };
 
       request.onerror = () => {
+        console.error('IndexedDB open error:', request.error);
+        this.initPromise = null;
         reject(request.error);
       };
     });

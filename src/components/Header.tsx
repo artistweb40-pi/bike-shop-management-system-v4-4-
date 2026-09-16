@@ -58,6 +58,8 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   cloudSyncStatus,
   onTriggerCloudSync,
+  isMobileMenuOpen = false,
+  onToggleMobileMenu,
 }) => {
   const [clock, setClock] = useState('');
   const handleTestModal = onOpenTestSimulation || onOpenTestModal || (() => {});
